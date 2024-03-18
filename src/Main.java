@@ -7,41 +7,42 @@ public class Main {
         String str = scn.nextLine();
         String[] regexActions = {"\\+", "-", "/", "\\*"};
         String[] data = str.split(regexActions[signalValue(str)]);
-        int sigForm = sign (str);
         String dataLeft = data[0];
         String dataRight = data[1];
-        if (dataLeft.matches("\\D+")) {
-            if (dataLeft.length() > 10 || dataRight.length() > 10 || signalValue(str) == -1 || plusSignal(str) >= 2 || minusSignal(str) >= 2 || astSignal(str) >= 2 || slashSignal(str) >= 2) {
-                throw new ScannerException("Некорректное выражение,формат операции не удовлетворяет заданию");
-            } else {
-                if (sigForm == 1) {
-                    String result = dataLeft + dataRight;
-                    System.out.println('"' + result + '"');
-                } else if (sigForm == 2) {
-                    String result = dataLeft.replace(dataRight, "");
-                    System.out.println('"' + result + '"');
-                } else if (sigForm == 4) {
-                    int n = Integer.parseInt(dataRight);
-                    if (n > 10) {
-                        throw new ScannerException("Некорректный ввод. Введите число от 1 до 10.");
-                    } else {
-                        String result = dataLeft.substring(0, dataLeft.length() / n);
-                        System.out.println('"' + result + '"');
-                    }
-                } else if (sigForm == 3) {
-                    int n = Integer.parseInt(dataRight);
-                    if (n > 10) {
-                        throw new ScannerException("Некорректный ввод. Введите число от 1 до 10.");
-                    } else {
-                        String result = multiplyString(dataLeft, n);
-                        System.out.println('"' + result.substring(0, 40) + "···" + '"');
-                    }
-                }
-
-            }
+        if (dataLeft.length() > 10 || dataRight.length() > 10 || signalValue(str) == -1 || plusSignal(str) >= 2 || minusSignal(str) >= 2 || astSignal(str) >= 2 || slashSignal(str) >= 2) {
+            throw new ScannerException("Некорректное выражение,формат операции не удовлетворяет заданию");
         } else {
-            throw new ScannerException("Некорректный ввод.");
+            if (sign (str) == 1) {
+                System.out.println('"' + calc (dataLeft, sign (str), dataRight) + '"');
+            } else if (sign (str) == 2) {
+                System.out.println('"' + calc (dataLeft, sign (str), dataRight) + '"');
+            } else if (sign (str) == 4) {
+                if (Integer.parseInt(dataRight)> 10) {
+                    throw new ScannerException("Некорректный ввод. Введите число от 1 до 10.");
+                } else {
+                    System.out.println('"' + calc (dataLeft, sign (str), dataRight) + '"');
+                }
+            } else if (sign (str) == 3) {
+                if (Integer.parseInt(dataRight) > 10) {
+                    throw new ScannerException("Некорректный ввод. Введите число от 1 до 10.");
+                } else {
+                    System.out.println('"' + calc (dataLeft, sign (str), dataRight) + '"');
+                }
+            }
         }
+    }
+    public static String calc (String a, int c, String b) {
+        String result = null;
+        if (c == 1) {
+            result = a + b;
+        } else if (c == 2) {
+            result = a.replace(b, "");
+        } else if (c == 3) {
+            result = multiplyString(a, Integer.parseInt(b));
+        } else if (c == 4) {
+            result = a.substring(0, a.length() / Integer.parseInt(b));
+        }
+        return result;
     }
     public static String multiplyString(String str, int n) {
         return String.valueOf(str).repeat(Math.max(0, n));
