@@ -1,53 +1,61 @@
 import java.util.Scanner;
 
 public class Main {
-    public static void main(String[] args) throws ScannerException{
+    public static void main(String[] args)  {
         System.out.println("INPUT");
         Scanner scn = new Scanner(System.in);
-        String str = scn.nextLine();
-        String[] regexActions = {"\\+", "-", "/", "\\*"};
-        String[] data = str.split(regexActions[signalValue(str)]);
-        String dataLeft = data[0];
-        String dataRight = data[1];
-        if (dataLeft.length() > 10 || dataRight.length() > 10 || signalValue(str) == -1 || plusSignal(str) >= 2 || minusSignal(str) >= 2 || astSignal(str) >= 2 || slashSignal(str) >= 2) {
-            throw new ScannerException("Некорректное выражение,формат операции не удовлетворяет заданию");
+        String input = scn.nextLine();
+        String[] str = input.split(signalValue(input));
+        String dataLeft = str[0];
+        String dataRight = str[1];
+        if (str.length != 2) {
+            throw new IllegalArgumentException("Неверный формат выражения");
+        }
+
+        if (!dataLeft.startsWith("\"") || !dataLeft.endsWith("\"")) {
+            throw new IllegalArgumentException("Операнды должны быть в кавычках");
+        }
+        if (dataLeft.length() > 12 || dataRight.length() > 12) {
+            throw new IllegalArgumentException("Некорректное выражение,формат операции не удовлетворяет заданию");
         } else {
-            if (sign (str) == 1) {
-                System.out.println('"' + calc (dataLeft, sign (str), dataRight) + '"');
-            } else if (sign (str) == 2) {
-                System.out.println('"' + calc (dataLeft, sign (str), dataRight) + '"');
-            } else if (sign (str) == 4) {
-                if (Integer.parseInt(dataRight)> 10) {
-                    throw new ScannerException("Некорректный ввод. Введите число от 1 до 10.");
-                } else {
-                    System.out.println('"' + calc (dataLeft, sign (str), dataRight) + '"');
-                }
-            } else if (sign (str) == 3) {
-                if (Integer.parseInt(dataRight) > 10) {
-                    throw new ScannerException("Некорректный ввод. Введите число от 1 до 10.");
-                } else {
-                    System.out.println('"' + calc (dataLeft, sign (str), dataRight) + '"');
-                }
-            }
+            System.out.println('"' + calc(dataLeft, sValue(input), dataRight) + '"');
         }
     }
-    public static String calc (String a, int c, String b) {
+    public static String calc(String a, String c, String b){
         String result = null;
-        if (c == 1) {
-            result = a + b;
-        } else if (c == 2) {
-            result = a.replace(b, "");
-        } else if (c == 3) {
-            result = multiplyString(a, Integer.parseInt(b));
-        } else if (c == 4) {
-            result = a.substring(0, a.length() / Integer.parseInt(b));
+        switch (c) {
+            case "+":
+                a = a.substring(1, a.length() - 1);
+                b = b.substring(1, b.length() - 1);
+                result = a + b;
+                break;
+            case "-":
+                a = a.substring(1, a.length() - 1);
+                b = b.substring(1, b.length() - 1);
+                result = a.replace(b, "");
+                break;
+            case "*":
+                a = a.substring(1, a.length() - 1);
+                int multiplier = Integer.parseInt(b);
+                StringBuilder sb = new StringBuilder();
+                for (int i = 0; i < multiplier; i++) {
+                    sb.append(a);
+                }
+                result = sb.toString();
+                break;
+            case "/":
+                a = a.substring(1, a.length() - 1);
+                int divisor = Integer.parseInt(b);
+                int quotient = a.length() / divisor;
+                result = a.substring(0, quotient);
+                break;
+        }
+        if (result.length() > 40) {
+            result = result.substring(0, 40) + "...";
         }
         return result;
     }
-    public static String multiplyString(String str, int n) {
-        return String.valueOf(str).repeat(Math.max(0, n));
-    }
-    public static int signalValue(String valueSignal) {
+    public static String signalValue(String valueSignal) {
         String[] actions = {"+", "-", "/", "*"};
         int actionIndex = -1;
         for (int i = 0; i < actions.length; i++) {
@@ -56,68 +64,20 @@ public class Main {
                 break;
             }
         }
-        return actionIndex;
+        //String[] regexActions = {"\\+", "-", "/", "\\*"};
+        String[] regexActions = {"\s\\+\s", "\s-\s" , "\s/\s", "\s\\*\s"};
+        String regexAction = regexActions[actionIndex];
+        return regexAction;
     }
-    public static int sign (String s){
-        int count = 0;
-        for (int i = 0; i < s.length(); i++) {
-            char c = s.charAt(i); // Обработка символа c
-            if (c == '+') {
-                count = 1;
-            } else if (c == '-') {
-                count = 2;
-            } else if (c == '*') {
-                count = 3;
-            } else if (c == '/') {
-                count = 4;
+    public static String sValue(String valueSignal) {
+        String[] actions = {"+", "-", "/", "*"};
+        String s = null;
+        for (int i = 0; i < actions.length; i++) {
+            if (valueSignal.contains(actions[i])) {
+                s = actions[i];
+                break;
             }
         }
-        return count;
+        return s;
     }
-    public static int plusSignal (String plus){
-        int plusCount = 0;
-        for (int i = 0; i < plus.length(); i++) {
-            char c = plus.charAt(i); // Обработка символа c
-            if (c == '+') {
-                plusCount++;
-            }
-        }
-        return plusCount;
-    }
-    public static int minusSignal (String minus){
-        int minusCount = 0;
-        for (int i = 0; i < minus.length(); i++) {
-            char c = minus.charAt(i); // Обработка символа c
-            if (c == '-') {
-                minusCount++;
-            }
-        }
-        return minusCount;
-    }
-    public static int astSignal (String ast){
-        int asteriskCount = 0;
-        for (int i = 0; i < ast.length(); i++) {
-            char c = ast.charAt(i); // Обработка символа c
-            if (c == '-') {
-                asteriskCount++;
-            }
-        }
-        return asteriskCount;
-    }
-    public static int slashSignal (String slash){
-        int slashCount = 0;
-        for (int i = 0; i < slash.length(); i++) {
-            char c = slash.charAt(i); // Обработка символа c
-            if (c == '-') {
-                slashCount++;
-            }
-        }
-        return slashCount;
-    }
-    public static class ScannerException extends Exception{
-        ScannerException(String description) {
-            super(description);
-        }
-    }
-
 }
